@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import products from '../models/products';
 import { faker } from '@faker-js/faker';
 
+import products from '../models/products';
 import { IOrderItem } from '../models/orders';
 import { logger } from '../middlewares/logger';
 

@@ -5,9 +5,10 @@ import mongoose from 'mongoose';
 import path from 'path';
 import productRouter from './routes/products';
 import orderRouter from './routes/orders';
+import authRouter from './routes/auth';
 import cors from 'cors';
 import { errors } from 'celebrate';
-import { errorHandler } from './middlewares/errorHandler';
+import { dbErrorHandler, errorHandler } from './middlewares/errorHandler';
 import { errorLogger, requestLogger } from './middlewares/logger';
 
 
@@ -34,9 +35,11 @@ app.use(requestLogger);
 
 app.use('/product', productRouter);
 app.use('/order', orderRouter);
+app.use('/auth', authRouter);
 
 app.use(errorLogger);
 app.use(errors());
+app.use(dbErrorHandler);
 app.use(errorHandler);
 
 // Слушаем 3000 порт

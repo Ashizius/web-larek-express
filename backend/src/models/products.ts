@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-interface IImage {
+export interface IImage {
   fileName: string;
   originalName: string;
 }
@@ -30,6 +30,10 @@ const productSchema = new Schema<IProduct>({
   category: { type: String, required: true },
   description: { type: String, required: false },
   price: { type: Number, required: false, default: null },
+});
+
+productSchema.post('deleteOne', function(product) {
+  console.log('%s has been deleted', product._id);
 });
 
 export default model<IProduct>('product', productSchema);
