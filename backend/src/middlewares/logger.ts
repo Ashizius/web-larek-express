@@ -1,4 +1,5 @@
 import {createLogger, transports, format} from 'winston';
+import { Request, Response, NextFunction } from 'express';
 import expressWinston from 'express-winston'
 
 export const requestLogger = expressWinston.logger({
@@ -33,4 +34,9 @@ if (process.env.NODE_ENV !== 'production') {
       level: 'debug',
     })
   );
+}
+
+export const showReqBody =( req: Request, res: Response, next: NextFunction) =>{
+  logger.debug(req.url,req.body);
+  next();
 }

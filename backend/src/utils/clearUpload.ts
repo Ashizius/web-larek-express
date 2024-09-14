@@ -27,10 +27,10 @@ const clearFiles = async (folder:string) => {
   }
 }
 
-const clearUploadsJob = new CronJob(
+export const clearUploadsJob = new CronJob(
   '* 1 * * * *', // cronTime
   function () {
-    clearFiles(path.join(__dirname, '../upload'));
+    clearFiles(path.join(__dirname, '../public/upload'));
   }
 );
 let pauses = 0;

@@ -5,7 +5,7 @@ import { logger } from '../middlewares/logger';
 import { pauseUploadsClear, resumeUploadsClear } from '../utils/clearUpload';
 //import { getDirname } from '../utils/getDirname';
 import path from 'path';
-import * as fs from 'node:fs/promises'
+import * as fs from 'node:fs/promises';
 
 //const __dirname = getDirname(import.meta.url);
 
@@ -17,45 +17,53 @@ export function getProduct(req: Request, res: Response) {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 }
 
-export async function createProduct(req: Request, res: Response, next: NextFunction) {
-  logger.debug('createProduct', req.body);
-  const { description, image, title, category, price } = req.body;
-  image.filename = path.basename(image.fileName);
-  pauseUploadsClear();
+export async function createProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { _id, ...payload } = req.body;
+  products
+    .createProduct(payload)
+    .then((item) => res.status(201).send(item))
+    .catch(next);
+  //image.filename = path.basename(image.fileName);
+}
+
+export async function editProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  logger.debug('@@@@@@@@@@@@@@@@@@@@@@@editProduct');
+  const { _id, productId, ...payload } = req.body;
+  console.log(payload);
+  products
+    .updateProduct(productId, payload)
+    .then((item) => res.status(201).send(item))
+    .catch(next);
+}
+
+export async function deleteProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  logger.debug('deleteProduct', req.body, __dirname);
+  const { productId } = req.body;
   let item;
   try {
-    await fs.rename(path.join(__dirname, '../upload', path.basename(image.fileName)), path.join(__dirname, '../images', path.basename(image.fileName)))
-    item = await products.create({ description, image, title, category, price })
+    item = await products.findByIdAndDelete(productId);
+    if (item?.image.fileName) {
+      const filePath = path.join(__dirname, '../public/', item.image.fileName);
+      //await fs.unlink(fileName);
+      console.log(filePath);
+    }
     res.status(201).send(item);
+    return;
   } catch (error) {
     return next(error);
   }
-  finally {
-    resumeUploadsClear();
-  }
 }
-
-
-export async function editProduct(req: Request, res: Response, next: NextFunction) {
-  logger.debug('editProduct', req.body);
-  const { _id, ...other } = req.body;
-  let item;
-  try {
-    if (other.image.filename) {
-      pauseUploadsClear();
-      await fs.rename(path.join(__dirname, '../upload', path.basename(other.image.fileName)), path.join(__dirname, '../images', path.basename(other.image.fileName)))
-    }
-    item = await products.findByIdAndUpdate(_id, other)
-    res.status(201).send(item);
-  } catch (error) {
-    return next(error);
-  }
-  finally {
-    if (other.image.filename) {
-      resumeUploadsClear();
-    }
-  }
-}
-
 
 //await fs.rename(file.path, path.join(__dirname, '../upload'));

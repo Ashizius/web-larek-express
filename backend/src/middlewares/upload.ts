@@ -1,19 +1,23 @@
 /*
 npm i --save multer
-npm i --save-dev @types/multer 
+npm i --save-dev @types/multer
 */
 import multer from 'multer';
-import { Request, Response, NextFunction } from 'express';
+import path from 'path';
 
+/*
 const storage = multer.diskStorage({
   destination:  '/uploads/',
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
     cb(null, file.fieldname + '-' + uniqueSuffix)
   }
-})
+})*/
 
-const upload = multer({ dest: 'uploads/' ,fileSize: 1E6});
+const destination = path.join(__dirname, '../public/uploads/');
+console.log(destination);
+
+const upload = multer({ dest:  destination, limits: { fileSize: 10E6 }});
 
 export const fileMiddleware = upload.single('file');
 

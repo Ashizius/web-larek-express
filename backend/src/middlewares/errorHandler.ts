@@ -10,7 +10,7 @@ export const dbErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(error);
+  //console.log(error);
   //console.log(error.message);
   if (error.code) {
     if (error.code === 11000) return next(new ConflictError('такая запись уже есть'));
@@ -18,7 +18,7 @@ export const dbErrorHandler = (
     const isCastError = error.message.indexOf('Cast to ObjectId failed')>0;
     if (isNotFound||isCastError) return next(new NotFoundError('запись не найдена или передан некорректный id'));
   }
-  next();
+  next(error);
 };
 
 
@@ -29,13 +29,14 @@ export const errorHandler = (
   next: NextFunction
 ) => {
   //console.log(error);
-  //console.log(error.message);
+  console.log(error.statusCode);
   if (error.statusCode) {
     switch (error.statusCode) {
       case 400:
+      case 401:
       case 404:
       case 409:
-        res.status(error.code).send({ message: error.message });
+        res.status(error.statusCode).send({ message: error.message });
         return;
       default:
         res.status(500).send({ message: 'Произошла ошибка' });

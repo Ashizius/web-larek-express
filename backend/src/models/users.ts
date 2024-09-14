@@ -133,7 +133,10 @@ userSchema.static(
         )
       );
     } else {
-      return this.findByIdAndUpdate(id, credentials);
+      return this.findByIdAndUpdate(id, credentials, {
+        new: true,
+        runValidators: true,
+      });
     }
   }
 );
