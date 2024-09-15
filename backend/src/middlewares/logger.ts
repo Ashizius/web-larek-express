@@ -1,21 +1,19 @@
-import {createLogger, transports, format} from 'winston';
+import { createLogger, transports, format } from 'winston';
 import { Request, Response, NextFunction } from 'express';
-import expressWinston from 'express-winston'
+import expressWinston from 'express-winston';
 
 export const requestLogger = expressWinston.logger({
-  transports: [
-    new transports.File({ filename: 'request.log' }),
-  ],
+  transports: [new transports.File({ filename: '/request.log' })],
   format: format.json(),
 });
 
 // логгер ошибок
 export const errorLogger = expressWinston.errorLogger({
-  transports: [new transports.File({ filename: 'error.log' })],
+  transports: [new transports.File({ filename: '/error.log' })],
   format: format.json(),
 });
 
-//дебаггер
+// дебаггер
 export const logger = createLogger({
   level: 'info',
   format: format.json(),
@@ -32,11 +30,15 @@ if (process.env.NODE_ENV !== 'production') {
         format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       ),
       level: 'debug',
-    })
+    }),
   );
 }
 
-export const showReqBody =( req: Request, res: Response, next: NextFunction) =>{
-  logger.debug(req.url,req.body);
+export const showReqBody = (
+  req: Request,
+  _: Response,
+  next: NextFunction,
+) => {
+  logger.debug(req.url, req.body);
   next();
-}
+};

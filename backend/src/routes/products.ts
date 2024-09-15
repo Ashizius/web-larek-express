@@ -1,15 +1,14 @@
+import { Router } from 'express';
 import {
   createProduct,
   deleteProduct,
   editProduct,
   getProduct,
 } from '../controllers/products';
-import { Router } from 'express';
 
-import { validateProducts } from '../middlewares/products';
-import { checkId } from '../middlewares/checkId';
+import validateProducts from '../middlewares/products';
+import checkId from '../middlewares/checkId';
 import { authByToken } from '../middlewares/auth';
-import { Request, Response, NextFunction } from 'express';
 
 const router = Router();
 router.get('/', getProduct);
@@ -20,7 +19,7 @@ router.patch(
   checkId,
   validateProducts,
   authByToken,
-  editProduct
+  editProduct,
 );
 router.delete('/:productId', checkId, authByToken, deleteProduct);
 

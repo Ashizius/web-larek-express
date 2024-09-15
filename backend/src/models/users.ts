@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import BadRequestError from '../errors/badRequestError';
+
 type Token = { token: string };
 
 export interface IUser {
@@ -11,35 +12,33 @@ export interface IUser {
   tokens: [Token];
 }
 
-export type userDocument = mongoose.Document<unknown, {}, IUser> &
+export type UserDocument = mongoose.Document<unknown, {}, IUser> &
   IUser &
   Required<{
     _id: mongoose.Schema.Types.ObjectId;
   }>;
-//mongoose.Document<unknown, any, IUser>;//mongoose.Document<mongoose.ObjectId, {}, IUser>;
 
 export interface UserModel extends mongoose.Model<IUser> {
   findUserByCredentials: (
     email: string,
     password: string
-  ) => Promise<userDocument>;
+  ) => Promise<UserDocument>;
   createUserByCredentials: (
     name: string,
     email: string,
     password: string
-  ) => Promise<userDocument>;
+  ) => Promise<UserDocument>;
   updateUser: (
     id: mongoose.ObjectId,
     payload: Partial<IUser>
-  ) => Promise<userDocument>;
+  ) => Promise<UserDocument>;
   updateRefreshToken: (
     id: mongoose.ObjectId,
     token: Token
-  ) => Promise<userDocument>;
-  clearRefreshToken: (id: mongoose.ObjectId) => Promise<userDocument>;
+  ) => Promise<UserDocument>;
+  clearRefreshToken: (id: mongoose.ObjectId) => Promise<UserDocument>;
 }
 
-//Проверить схему!
 const userSchema = new mongoose.Schema<IUser, UserModel>({
   name: {
     type: String,
@@ -69,14 +68,14 @@ userSchema.static(
   'updateRefreshToken',
   function updateRefreshToken(id: mongoose.ObjectId, token: string) {
     return this.findByIdAndUpdate(id, { $push: { tokens: token } });
-  }
+  },
 );
 
 userSchema.static(
   'clearRefreshToken',
   async function clearRefreshToken(id: mongoose.ObjectId) {
     return this.findByIdAndUpdate(id, { $set: { tokens: [] } });
-  }
+  },
 );
 
 userSchema.static(
@@ -84,12 +83,12 @@ userSchema.static(
   async function createUserByCredentials(
     name: string,
     email: string,
-    password: string
+    password: string,
   ) {
     return bcrypt
       .hash(password, 10)
       .then((hash: string) => this.create({ name, email, password: hash }));
-  }
+  },
 );
 
 userSchema.static(
@@ -100,7 +99,7 @@ userSchema.static(
       .then((user) => {
         if (!user) {
           return Promise.reject(
-            new BadRequestError('Неправильная почта или пароль')
+            new BadRequestError('Неправильная почта или пароль'),
           );
         }
         return bcrypt
@@ -108,13 +107,13 @@ userSchema.static(
           .then((matched: boolean) => {
             if (!matched) {
               return Promise.reject(
-                new BadRequestError('Неправильная почта или пароль')
+                new BadRequestError('Неправильная почта или пароль'),
               );
             }
             return user;
           });
       });
-  }
+  },
 );
 
 userSchema.static(
@@ -122,23 +121,20 @@ userSchema.static(
   async function updateUser(id: mongoose.ObjectId, payload: Partial<IUser>) {
     const { password, ...credentials } = payload;
     if (password) {
-      return bcrypt.hash(password, 10).then((hash: string) =>
-        this.findByIdAndUpdate(
-          id,
-          { password: hash, ...credentials },
-          {
-            new: true,
-            runValidators: true,
-          }
-        )
-      );
-    } else {
-      return this.findByIdAndUpdate(id, credentials, {
-        new: true,
-        runValidators: true,
-      });
+      return bcrypt.hash(password, 10).then((hash: string) => this.findByIdAndUpdate(
+        id,
+        { password: hash, ...credentials },
+        {
+          new: true,
+          runValidators: true,
+        },
+      ));
     }
-  }
+    return this.findByIdAndUpdate(id, credentials, {
+      new: true,
+      runValidators: true,
+    });
+  },
 );
 
 export default mongoose.model<IUser, UserModel>('user', userSchema);

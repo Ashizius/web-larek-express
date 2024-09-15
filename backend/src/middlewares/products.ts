@@ -1,6 +1,10 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 
-const joiCondition = { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() }
+const joiCondition = {
+  is: Joi.exist(),
+  then: Joi.optional(),
+  otherwise: Joi.required(),
+};
 
 const validationScheme = Joi.object({
   _id: Joi.string().length(24).optional(),
@@ -14,15 +18,9 @@ const validationScheme = Joi.object({
   description: Joi.string().optional(),
   price: Joi.number().optional(),
 });
-/*
-const idValidationScheme = Joi.object({productsValidation, ...
-  ,
-});
 
-export const validateProductsId = celebrate({
-  [Segments.BODY]: idValidationScheme,
-});*/
-
-export const validateProducts = celebrate({
+const validateProducts = celebrate({
   [Segments.BODY]: validationScheme,
 });
+
+export default validateProducts;

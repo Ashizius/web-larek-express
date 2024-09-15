@@ -1,7 +1,12 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 import { paymentMethods } from '../models/orders';
 
-const joiCondition = { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() }
+const joiCondition = {
+  is: Joi.exist(),
+  then: Joi.optional(),
+  otherwise: Joi.required(),
+};
+
 const validationScheme = Joi.object({
   _id: Joi.string().optional(),
   payment: Joi.string()
@@ -14,6 +19,8 @@ const validationScheme = Joi.object({
   items: Joi.array().items(Joi.string()).when('_id', joiCondition),
 });
 
-export const validateOrder = celebrate({
+const validateOrder = celebrate({
   [Segments.BODY]: validationScheme,
 });
+
+export default validateOrder;

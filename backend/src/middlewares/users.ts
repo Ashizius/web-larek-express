@@ -1,13 +1,17 @@
 import { celebrate, Joi, Segments } from 'celebrate';
 
-const joiCondition = { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() }
+const joiCondition = {
+  is: Joi.exist(),
+  then: Joi.optional(),
+  otherwise: Joi.required(),
+};
 
 const validationScheme = Joi.object({
   _id: Joi.string().length(24).optional(),
   name: Joi.string().min(2).max(30).when('_id', joiCondition),
   email: Joi.string().email().when('_id', joiCondition),
   password: Joi.string().when('_id', joiCondition),
-  //passwordConfirm: Joi.valid(Joi.ref("password")).required(),
+  // passwordConfirm: Joi.valid(Joi.ref("password")).required(), //на случай повтора пароля
 });
 
 const validationLoginScheme = Joi.object({

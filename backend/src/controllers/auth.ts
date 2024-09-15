@@ -1,37 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
-import { secretKey } from '../utils/accessKey';
-import users, { IUser, userDocument, UserModel } from '../models/users';
 import jwt from 'jsonwebtoken';
 import ms from 'ms';
-import BadRequestError from '../errors/badRequestError';
-import mongoose from 'mongoose';
+import secretKey from '../utils/accessKey';
+import users, { UserDocument } from '../models/users';
 import InternalError from '../errors/internalError';
 import { logger } from '../middlewares/logger';
 
 export const signAndSend = (
   res: Response,
-  userDocument: userDocument | null,
-  isSendUser = true
+  userDocument: UserDocument | null,
+  isSendUser = true,
 ) => {
-  if (!userDocument)
+  if (!userDocument) {
     return Promise.reject(new InternalError('ошибка получения данных'));
+  }
   const user = userDocument.toObject();
 
   const { email, name, _id } = user;
 
-  if (!_id || !email || !name)
+  if (!_id || !email || !name) {
     return Promise.reject(new InternalError('ошибка получения данных'));
+  }
 
   const accessToken = jwt.sign({ _id }, secretKey, {
     expiresIn: ms(process.env.AUTH_ACCESS_TOKEN_EXPIRY || '1m'),
   });
-  const refreshToken =
-    'Bearer ' +
+  const refreshToken = `Bearer ${
     jwt.sign({ _id }, secretKey, {
       expiresIn: ms(process.env.AUTH_REFRESH_TOKEN_EXPIRY || '7d'),
-    });
+    })}`;
 
-    return users.updateRefreshToken(_id, { token: refreshToken }).then(() => {
+  return users.updateRefreshToken(_id, { token: refreshToken }).then(() => {
     res.cookie('refreshToken', refreshToken, {
       sameSite: 'lax',
       secure: false,
@@ -42,7 +41,7 @@ export const signAndSend = (
     logger.debug('updated RefreshToken in DB');
     if (!isSendUser) {
       res.status(200).send({ accessToken });
-      return
+      return;
     }
     res.status(200).send({
       user: { email, name },
@@ -61,7 +60,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const logout = (req: Request, res: Response, next: NextFunction) => {
-  const id = req.body['_id'];
+  const id = req.body._id;
   res.cookie('refreshToken', '', {
     sameSite: 'lax',
     secure: false,
@@ -96,10 +95,10 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
 export const refreshToken = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const id = req.body['_id'];
-  logger.debug('refreshToken',req.body);
+  const id = req.body._id;
+  logger.debug('refreshToken', req.body);
   return users
     .findById(id)
     .then((dbUser) => signAndSend(res, dbUser, false))
@@ -107,16 +106,12 @@ export const refreshToken = (
 };
 
 export const showUser = (req: Request, res: Response, next: NextFunction) => {
-  //console.log('req.body', req.body);
-  //console.log("req.body['_id']", req.body['_id']);
-  const id = req.body['_id'];
-  //console.log(req.body);
+  const id = req.body._id;
   return users
     .findById(id)
     .then((dbUser) => {
-      //console.log(dbUser);
       const user = dbUser?.toObject();
-      res.status(200).send({user: { name: user?.name, email: user?.email }});
+      res.status(200).send({ user: { name: user?.name, email: user?.email } });
     })
     .catch(next);
 };

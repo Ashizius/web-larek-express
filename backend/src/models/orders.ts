@@ -4,7 +4,7 @@ export interface IOrderItem {
 }
 
 export const paymentMethods = ['card', 'online'] as const;
-export type paymentMethodsType = typeof paymentMethods[number]
+export type paymentMethodsType = (typeof paymentMethods)[number];
 
 export interface IOrder {
   payment: paymentMethodsType;
