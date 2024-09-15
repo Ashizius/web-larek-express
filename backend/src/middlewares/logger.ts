@@ -1,15 +1,20 @@
 import { createLogger, transports, format } from 'winston';
 import { Request, Response, NextFunction } from 'express';
 import expressWinston from 'express-winston';
+import path from 'path';
 
 export const requestLogger = expressWinston.logger({
-  transports: [new transports.File({ filename: '/request.log' })],
+  transports: [
+    new transports.File({ filename: path.join(`${__dirname}../../../logs/request.log`) }),
+  ],
   format: format.json(),
 });
 
 // логгер ошибок
 export const errorLogger = expressWinston.errorLogger({
-  transports: [new transports.File({ filename: '/error.log' })],
+  transports: [
+    new transports.File({ filename: path.join(`${__dirname}../../../logs/error.log`) }),
+  ],
   format: format.json(),
 });
 
@@ -34,11 +39,7 @@ if (process.env.NODE_ENV !== 'production') {
   );
 }
 
-export const showReqBody = (
-  req: Request,
-  _: Response,
-  next: NextFunction,
-) => {
+export const showReqBody = (req: Request, _: Response, next: NextFunction) => {
   logger.debug(req.url, req.body);
   next();
 };

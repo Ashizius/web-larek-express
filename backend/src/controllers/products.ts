@@ -8,7 +8,7 @@ import { logger } from '../middlewares/logger';
 export function getProduct(_:Request, res: Response) {
   return products
     .find({})
-    .then((items) => res.status(200).send({ items }))
+    .then((items) => res.status(200).send({ items, total: items.length }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 }
 
