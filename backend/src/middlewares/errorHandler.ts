@@ -5,8 +5,8 @@ import NotFoundError from '../errors/notFoundError';
 export const dbErrorHandler = (
   error: any,
   _: Request,
-  res: Response,
-  next: NextFunction
+  __: Response,
+  next: NextFunction,
 ) => {
   if (error.code) {
     let dbName;
@@ -18,14 +18,13 @@ export const dbErrorHandler = (
       dbName = 'Пользователь';
       keyName = error.keyValue.name;
     }
-    if (error.code === 11000)
-      return next(new ConflictError(`${dbName} ${keyName} уже есть`));
+    if (error.code === 11000) return next(new ConflictError(`${dbName} ${keyName} уже есть`));
   }
   const isNotFound = error.message.indexOf('not found') > 0;
   const isCastError = error.message.indexOf('Cast to ObjectId failed') > 0;
   if (isNotFound || isCastError) {
     return next(
-      new NotFoundError('запись не найдена или передан некорректный id')
+      new NotFoundError('запись не найдена или передан некорректный id'),
     );
   }
   return next(error);
@@ -37,7 +36,7 @@ export const errorHandler = (
   error: any,
   _: Request,
   res: Response,
-  __: NextFunction
+  __: NextFunction,
 ) => {
   if (error.statusCode) {
     if (statusCodes.includes(error.statusCode)) {
@@ -48,5 +47,4 @@ export const errorHandler = (
     return;
   }
   res.status(500).send({ message: 'Произошла ошибка' });
-  return;
 };
