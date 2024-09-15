@@ -13,8 +13,6 @@ import { errorLogger, requestLogger } from './middlewares/logger';
 import cookieParser from 'cookie-parser';
 import { clearUploadsJob } from './utils/schedules';
 import { clearUploads } from './utils/uploadsHandlers';
-//import readline from 'node:readline';
-//import { stdin, stdout } from 'node:process';
 
 const { PORT = 3000, DB_ADDRESS = 'mongodb://127.0.0.1:27017/weblarek' } =
   process.env;
@@ -61,47 +59,3 @@ let server = app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
   console.log(`DB is opened on address ${DB_ADDRESS}`);
 });
-
-/*
-const haltServerForced = () => {
-  console.error('Force shutdown');
-  db.close().then(() => {
-    process.exit(1);
-  });
-  setTimeout(() => process.exit(1), 10 * 1000);
-};
-
-const haltServer = () => {
-  server.close(() => {
-    console.log('Closing connections');
-    db.close().then(() => {
-      console.log('Closed out database');
-      process.exit(0);
-    });
-  });
-};
-
-
-const rl = readline.createInterface({ input: stdin, output: stdout });
-rl.write(
-  `${'\x1b[1m'}${'\x1b[36m'}type ${'\x1b[35m'}exit${'\x1b[36m'} to quit the app${'\n'}${'\x1b[0m'}`
-);
-
-rl.on('SIGINT', () => {
-  rl.question('Are you sure you want to exit? ', (answer) => {
-    if (answer.match(/^y(es)?$/i)) {
-      haltServer();
-      setTimeout(haltServerForced, 10 * 1000);
-    }
-  });
-});
-
-rl.on('line', (line) => {
-  // ждём данных из stdin
-  //process.stdout.write(String(line));
-  if (line.match(/^e(xit)?$/i)) {
-    haltServer();
-    setTimeout(haltServerForced, 10 * 1000);
-  }
-});
-*/

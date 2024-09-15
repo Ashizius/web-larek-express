@@ -5,11 +5,11 @@ import * as fs from 'node:fs/promises';
 import products from '../models/products';
 import { logger } from '../middlewares/logger';
 
-export function getProduct(_:Request, res: Response) {
+export function getProduct(_: Request, res: Response, next: NextFunction) {
   return products
     .find({})
     .then((items) => res.status(200).send({ items, total: items.length }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 }
 
 export async function createProduct(
@@ -34,7 +34,7 @@ export async function editProduct(
   logger.debug('Product updated');
   products
     .updateProduct(productId, payload)
-    .then((item) => res.status(201).send(item))
+    .then((item) => res.status(200).send(item))
     .catch(next);
 }
 
@@ -48,12 +48,12 @@ export async function deleteProduct(
   let item;
   try {
     item = await products.findByIdAndDelete(productId);
-    if (item?.image.fileName) {
+    if (item?.image?.fileName) {
       const filePath = path.join(__dirname, '../public/', item.image.fileName);
       await fs.unlink(filePath);
       logger.debug('deleted file:', filePath);
     }
-    return res.status(201).send(item);
+    return res.status(200).send(item);
   } catch (error) {
     return next(error);
   }

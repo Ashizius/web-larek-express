@@ -10,6 +10,7 @@ export const signAndSend = (
   res: Response,
   userDocument: UserDocument | null,
   isSendUser = true,
+  isNewUser = false,
 ) => {
   if (!userDocument) {
     return Promise.reject(new InternalError('ошибка получения данных'));
@@ -25,10 +26,9 @@ export const signAndSend = (
   const accessToken = jwt.sign({ _id }, secretKey, {
     expiresIn: ms(process.env.AUTH_ACCESS_TOKEN_EXPIRY || '1m'),
   });
-  const refreshToken = `Bearer ${
-    jwt.sign({ _id }, secretKey, {
-      expiresIn: ms(process.env.AUTH_REFRESH_TOKEN_EXPIRY || '7d'),
-    })}`;
+  const refreshToken = `Bearer ${jwt.sign({ _id }, secretKey, {
+    expiresIn: ms(process.env.AUTH_REFRESH_TOKEN_EXPIRY || '7d'),
+  })}`;
 
   return users.updateRefreshToken(_id, { token: refreshToken }).then(() => {
     res.cookie('refreshToken', refreshToken, {
@@ -43,7 +43,7 @@ export const signAndSend = (
       res.status(200).send({ accessToken });
       return;
     }
-    res.status(200).send({
+    res.status(isNewUser ? 201 : 200).send({
       user: { email, name },
       success: true,
       accessToken,
@@ -80,7 +80,7 @@ export const register = (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password } = req.body;
   return users
     .createUserByCredentials(name, email, password)
-    .then((dbUser) => signAndSend(res, dbUser))
+    .then((dbUser) => signAndSend(res, dbUser, true, true))
     .catch(next);
 };
 

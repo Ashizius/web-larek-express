@@ -19,7 +19,7 @@ const uploadFile = async (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     return next(error);
   }
-  return res.send({
+  return res.status(201).send({
     fileName: `/images/${path.basename(uniqueName)}`,
     originalName: path.basename(file.originalname),
   });
