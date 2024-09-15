@@ -5,8 +5,8 @@ import NotFoundError from '../errors/notFoundError';
 export const dbErrorHandler = (
   error: any,
   _: Request,
-  __: Response,
-  next: NextFunction,
+  res: Response,
+  next: NextFunction
 ) => {
   if (error.code) {
     let dbName;
@@ -18,21 +18,27 @@ export const dbErrorHandler = (
       dbName = 'Пользователь';
       keyName = error.keyValue.name;
     }
-    if (error.code === 11000) return next(new ConflictError(`${dbName} ${keyName} уже есть`));
-    const isNotFound = error.message.indexOf('not found') > 0;
-    const isCastError = error.message.indexOf('Cast to ObjectId failed') > 0;
-    if (isNotFound || isCastError) {
-      return next(
-        new NotFoundError('запись не найдена или передан некорректный id'),
-      );
-    }
+    if (error.code === 11000)
+      return next(new ConflictError(`${dbName} ${keyName} уже есть`));
+  }
+  const isNotFound = error.message.indexOf('not found') > 0;
+  const isCastError = error.message.indexOf('Cast to ObjectId failed') > 0;
+  if (isNotFound || isCastError) {
+    return next(
+      new NotFoundError('запись не найдена или передан некорректный id')
+    );
   }
   return next(error);
 };
 
 const statusCodes = [400, 401, 404, 409];
 
-export const errorHandler = (error: any, _: Request, res: Response) => {
+export const errorHandler = (
+  error: any,
+  _: Request,
+  res: Response,
+  __: NextFunction
+) => {
   if (error.statusCode) {
     if (statusCodes.includes(error.statusCode)) {
       res.status(error.statusCode).send({ message: error.message });
@@ -41,6 +47,6 @@ export const errorHandler = (error: any, _: Request, res: Response) => {
     res.status(500).send({ message: 'Произошла ошибка' });
     return;
   }
-
   res.status(500).send({ message: 'Произошла ошибка' });
+  return;
 };

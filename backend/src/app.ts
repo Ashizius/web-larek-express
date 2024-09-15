@@ -50,11 +50,9 @@ app.use('/auth', authRouter);
 app.use('/upload', uploadRouter);
 
 app.use(errorLogger);
-app.use(errors());
-app.use(dbErrorHandler);
-app.use(errorHandler);
+//app.use(errors());
+app.use(dbErrorHandler, errorHandler);
 
-clearUploads();
 clearUploadsJob;
 
 // Слушаем 3000 порт
